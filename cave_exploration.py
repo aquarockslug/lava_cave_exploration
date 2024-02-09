@@ -6,8 +6,8 @@ from dataclasses import dataclass
 class GameData():
     fps: int = 50
     menu_color: tuple = (155, 166, 177)
-    bg_color: tuple = (0, 0, 0)
-    player_color: tuple = (255, 0, 255)
+    bg_color: tuple = (255, 127, 0)
+    player_color: tuple = (250, 26, 142)
     clock: object = pygame.time.Clock()
     size: dict = (1080, 1080) 
     middle: dict = (size[0]/2, size[1]/2) 
@@ -20,11 +20,9 @@ def main():
     # TODO: Create player object
     player = Sprite([game.middle[0], game.middle[1]], [20, 20], game.player_color)
     player.move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
-    player.vx = 5
-    player.vy = 5
 
-    global hall_group
-    hall_group = pygame.sprite.Group()
+    global path_group
+    path_group = pygame.sprite.Group()
     create_path([game.middle[0], game.middle[1] - game.size[1]/2])
 
     player_group = pygame.sprite.Group()
@@ -37,13 +35,18 @@ def main():
                 loop = False
 
         game.screen.fill(game.bg_color)
-        update_player(player)
+        move(player)
 
-        # TODO: trigger when player isnt touching hall_group
-        # hit = pygame.sprite.spritecollide(player, hall_group, True)
-        # if hit: player.image.fill((255, 0, 0))
+        if pygame.sprite.spritecollide(player, path_group, False):
+            player.image.fill(game.player_color)
+        else:
+            if player.image.get_at([0, 0]) == game.player_color:
+                print("lava entered")
+                # player.lava_entered()    
+            # player.burn()
+            player.image.fill((255, 0, 0))
 
-        hall_group.draw(game.screen)
+        path_group.draw(game.screen)
         player_group.draw(game.screen)
 
         pygame.display.update()
@@ -51,21 +54,23 @@ def main():
 
     sys.exit()
 
-def update_player(player):
+def move(player):
     key = pygame.key.get_pressed()
     for i in range(2):
         if key[player.move[i]]:
-            player.rect.x += player.vx * [-1, 1][i]
+            for sprite in path_group:
+                sprite.rect.x += 5 * [1, -1][i]
 
     for i in range(2):
         if key[player.move[2:4][i]]:
-            player.rect.y += player.vy * [-1, 1][i]
+            for sprite in path_group:
+                sprite.rect.y += 5 * [1, -1][i]
 
 # factory
 def create_path(pos):
     # TODO: random generation
-    new_path = Hallway(pos, [300, 1300])
-    return hall_group.add(new_path)
+    new_path = Path(pos, [160, 1000])
+    return path_group.add(new_path)
 
 # Game objects
 
@@ -79,10 +84,10 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = pos
                 
-class Hallway(Sprite):
+class Path(Sprite):
     length = 100
     def __init__(self, pos, size):
-        super().__init__(pos, size, (40, 30, 20))
+        super().__init__(pos, size, (87, 93, 94))
         self.length = size[1] 
    
 if __name__ == '__main__':
