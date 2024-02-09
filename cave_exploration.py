@@ -8,26 +8,28 @@ class GameData():
     menu_color: tuple = (155, 166, 177)
     bg_color: tuple = (255, 127, 0)
     player_color: tuple = (250, 26, 142)
+    path_color: tuple = (87, 93, 94)
     clock: object = pygame.time.Clock()
     size: dict = (1080, 1080) 
     middle: dict = (size[0]/2, size[1]/2) 
     screen: object = pygame.display.set_mode([size[0], size[1]])
 
 def main():
+    global game
     pygame.init()
     game = GameData()
 
     # TODO: Create player object
-    player = Sprite([game.middle[0], game.middle[1]], [20, 20], game.player_color)
+    player = Player([game.middle[0], game.middle[1]], [20, 20])
     player.move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
 
     global path_group
     path_group = pygame.sprite.Group()
     create_path([game.middle[0], game.middle[1] - game.size[1]/2])
-
+    
     player_group = pygame.sprite.Group()
     player_group.add(player)
-
+    
     loop = True
     while loop:
         for event in pygame.event.get(): 
@@ -35,16 +37,14 @@ def main():
                 loop = False
 
         game.screen.fill(game.bg_color)
-        move(player)
+        player.movement_handler() 
 
         if pygame.sprite.spritecollide(player, path_group, False):
             player.image.fill(game.player_color)
         else:
             if player.image.get_at([0, 0]) == game.player_color:
-                print("lava entered")
-                # player.lava_entered()    
-            # player.burn()
-            player.image.fill((255, 0, 0))
+                player.fall_in_lava()    
+            player.burn()
 
         path_group.draw(game.screen)
         player_group.draw(game.screen)
@@ -54,19 +54,7 @@ def main():
 
     sys.exit()
 
-def move(player):
-    key = pygame.key.get_pressed()
-    for i in range(2):
-        if key[player.move[i]]:
-            for sprite in path_group:
-                sprite.rect.x += 5 * [1, -1][i]
-
-    for i in range(2):
-        if key[player.move[2:4][i]]:
-            for sprite in path_group:
-                sprite.rect.y += 5 * [1, -1][i]
-
-# factory
+    # factory
 def create_path(pos):
     # TODO: random generation
     new_path = Path(pos, [160, 1000])
@@ -84,11 +72,41 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = pos
                 
+class Player(Sprite):
+    speed = 5
+
+    def __init__(self, pos, size):
+        super().__init__(pos, size, game.player_color)
+
+    def movement_handler(self):
+        key = pygame.key.get_pressed()
+        for i in range(2):
+            if key[self.move[i]]:
+                for sprite in path_group:
+                    sprite.rect.x += self.speed * [1, -1][i]
+
+        for i in range(2):
+            if key[self.move[2:4][i]]:
+                for sprite in path_group:
+                    sprite.rect.y += self.speed * [1, -1][i]
+
+    def fall_in_lava(self):
+        print("lava entered")
+        # play sound and animation
+        pass
+
+    def burn(self):
+        self.image.fill((255, 0, 0))
+        # self.health -= 1
+        pass
+
 class Path(Sprite):
     length = 100
     def __init__(self, pos, size):
-        super().__init__(pos, size, (87, 93, 94))
+        super().__init__(pos, size, game.path_color)
         self.length = size[1] 
+
+# class volcano(Sprite):
    
 if __name__ == '__main__':
     main()
