@@ -74,6 +74,7 @@ class Sprite(pygame.sprite.Sprite):
                 
 class Player(Sprite):
     speed = 5
+    health = 100
 
     def __init__(self, pos, size):
         super().__init__(pos, size, game.player_color)
@@ -97,7 +98,7 @@ class Player(Sprite):
 
     def burn(self):
         self.image.fill((255, 0, 0))
-        # self.health -= 1
+        self.health -= 1
         pass
 
 class Path(Sprite):
