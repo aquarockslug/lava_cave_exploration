@@ -45,13 +45,14 @@ class Player(Sprite):
 
 # line of rects
 class Path():
-    destination = None
     sections = []
-    length = 20
+    length = 80
+    destination = None
     def __init__(self, pos, size, angle):
         for i in range(0, self.length):
             self.sections.append(
-                Sprite([pos[0] - (i*size[0]/angle[0]), pos[1] - (i*size[1]/angle[1])], 
+                Sprite([pos[0] - (i*size[0]*angle[0]),
+                        pos[1] - (i*size[1]*angle[1])],
                        size, game.floor_color)
             )
         self.destination = self.sections[self.length-1].rect.center

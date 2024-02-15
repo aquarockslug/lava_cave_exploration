@@ -67,18 +67,19 @@ def main():
     game.clock.tick(game.fps)
 
 def create_start_location():
-    # create_island([game.middle[0], game.middle[1]])
-    create_paths([game.middle[0], game.middle[1]])
+    create_island([game.middle[0], game.middle[1]])
+    paths = create_fork([game.middle[0], game.middle[1]])
+    create_fork(paths[0].destination)
+    # all paths have same destination?
     
-def create_paths(pos):
-    # TODO: random angle
-    paths = [create_path(pos, [8, 8])]
-    for i in range(1, 5):
-        paths.append(create_path(paths[i-1].destination, [random.randint(1, 8), 8]))
-    # first_path = create_path(pos, [8, 8])
-    # second_path = create_path(first_path.destination, [-4, 4])
-
-    # floor_group.add(Path(pos, [160, 1000], 270))
+def create_fork(pos):
+    paths = []
+    paths.append(create_path(pos, [0.3, 0.1]))
+    paths.append(create_path(pos, [0.1, 0.1]))
+    paths.append(create_path(pos, [-0.3, 0.1]))
+    paths.append(create_path(pos, [-0.1, 0.1]))
+    paths.append(create_path(pos, [0, 0.5]))
+    return paths
 
 def create_path(pos, angle):
     angle_vector = angle # TODO: degrees to angle_vector
