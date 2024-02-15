@@ -43,17 +43,18 @@ class Player(Sprite):
         self.image.fill((255, 0, 0))
         self.health -= 1
 
-class Path(Sprite):
+# line of rects
+class Path():
     destination = None
+    sections = []
+    length = 20
     def __init__(self, pos, size, angle):
-        super().__init__(pos, size, game.floor_color)
-        # TODO rotate around pos
-        self.image = pygame.transform.rotate(self.image, angle)
-        self.rect.midbottom = pos
-        self.destination = self.rect.midtop
-
-    def update(self):
-        game.screen.blit(self.image, self.rect.center)
+        for i in range(0, self.length):
+            self.sections.append(
+                Sprite([pos[0] - (i*size[0]/angle[0]), pos[1] - (i*size[1]/angle[1])], 
+                       size, game.floor_color)
+            )
+        self.destination = self.sections[self.length-1].rect.center
 
 class Island(Sprite):
     def __init__(self, pos):

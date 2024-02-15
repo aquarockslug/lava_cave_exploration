@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 from sprites import *
 from dataclasses import dataclass
 
@@ -38,7 +39,7 @@ def init():
     my_font = pygame.font.SysFont("monospace", 42)
     
     global health_display
-    health_display = my_font.render("100", 1, (255, 255, 0))
+    health_display = my_font.render("100", 1, (255, 255, 255))
 
     create_start_location()
 
@@ -66,13 +67,25 @@ def main():
     game.clock.tick(game.fps)
 
 def create_start_location():
-    create_island([game.middle[0], game.middle[1]])
+    # create_island([game.middle[0], game.middle[1]])
     create_paths([game.middle[0], game.middle[1]])
     
 def create_paths(pos):
-    # TODO: random angle 
-    floor_group.add(Path(pos, [160, 1000], 0))
+    # TODO: random angle
+    paths = [create_path(pos, [8, 8])]
+    for i in range(1, 5):
+        paths.append(create_path(paths[i-1].destination, [random.randint(1, 8), 8]))
+    # first_path = create_path(pos, [8, 8])
+    # second_path = create_path(first_path.destination, [-4, 4])
+
     # floor_group.add(Path(pos, [160, 1000], 270))
+
+def create_path(pos, angle):
+    angle_vector = angle # TODO: degrees to angle_vector
+    new_path = Path(pos, [180, 180], angle_vector)
+    for section in new_path.sections:
+        floor_group.add(section)
+    return new_path
 
 def create_island(pos):
     new_island = Island(pos)
