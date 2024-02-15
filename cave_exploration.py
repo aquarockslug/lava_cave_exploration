@@ -34,6 +34,12 @@ def init():
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
+    global my_font
+    my_font = pygame.font.SysFont("monospace", 42)
+    
+    global health_display
+    health_display = my_font.render("100", 1, (255, 255, 0))
+
     create_start_location()
 
 def main():
@@ -49,9 +55,9 @@ def main():
             player.burning = True
    
     if player.burning: player.take_burn_damage()
-
-    # for path in floor_group:
-        # path.update()
+        
+    health_display = my_font.render(str(player.health), 1, (255, 255, 0))
+    game.screen.blit(health_display, (50, 50))
 
     floor_group.draw(game.screen)
     player_group.draw(game.screen)
@@ -66,7 +72,7 @@ def create_start_location():
 def create_paths(pos):
     # TODO: random angle 
     floor_group.add(Path(pos, [160, 1000], 0))
-    floor_group.add(Path(pos, [160, 1000], 270))
+    # floor_group.add(Path(pos, [160, 1000], 270))
 
 def create_island(pos):
     new_island = Island(pos)
@@ -83,4 +89,3 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT: 
                 playing = False 
     sys.exit()
-
