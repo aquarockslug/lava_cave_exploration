@@ -79,9 +79,7 @@ def create_map(size):
             create_path(p.destination)
 
 def create_path(pos):
-    angles = [[0, 1], [3, 1], [-3, 1]]
-    new_path_angle = angles[random.randint(0, len(angles)-1)]
-
+    new_path_angle = random.choice([[0, 1], [3, 1], [-3, 1]])
     if new_path_angle == [0, 1]: new_length = random.randint(40, 80)
     else: new_length = random.randint(80, 160)
 
