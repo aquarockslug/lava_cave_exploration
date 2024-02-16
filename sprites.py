@@ -16,7 +16,7 @@ class Sprite(pygame.sprite.Sprite):
         self.rect.center = pos
                 
 class Player(Sprite):
-    speed = 7 
+    speed = 12 
     health = 100
     burning = False
 
@@ -33,7 +33,7 @@ class Player(Sprite):
         for i in range(2):
             if key[self.move[2:4][i]]:
                 for sprite in floor_group:
-                    sprite.rect.y += self.speed * [1, -1][i]
+                    sprite.rect.y += self.speed/2 * [1, -1][i]
 
     def fall_in_lava(self):
         print("lava entered")
@@ -46,23 +46,26 @@ class Player(Sprite):
 # line of rects
 class Path():
     sections = []
-    length = 80
-    destination = None
-    def __init__(self, pos, size, angle):
+    length = 0
+    destination = []
+    def __init__(self, pos, size, length, angle):
+        self.length = length
+        angle = [angle[0]*10, angle[1]*10]
         for i in range(0, self.length):
             self.sections.append(
-                Sprite([pos[0] - (i*size[0]*angle[0]),
-                        pos[1] - (i*size[1]*angle[1])],
+                Sprite([pos[0] + (i*angle[0]),
+                        pos[1] + (i*angle[1])],
                        size, game.floor_color)
             )
-        self.destination = self.sections[self.length-1].rect.center
+            
+        self.destination = [
+                pos[0] + (self.length*angle[0]),
+                pos[1] + (self.length*angle[1]),
+        ]
 
 class Island(Sprite):
     def __init__(self, pos):
         super().__init__(pos, [512, 512], game.floor_color)
         self.rect.center = pos
-
-class HealthBar():
-    pass
 
 # class volcano(Sprite):

@@ -41,12 +41,23 @@ def init():
     global health_display
     health_display = my_font.render("100", 1, (255, 255, 255))
 
-    create_start_location()
+    global paths
+    paths = []
+
+    create_map(50)
 
 def main():
     game.screen.fill(game.bg_color)
     player.movement_handler(floor_group) 
+    update_display()
+    update_collision()
+    if player.burning: player.take_burn_damage()
+    floor_group.draw(game.screen)
+    player_group.draw(game.screen)
+    pygame.display.update()
+    game.clock.tick(game.fps)
 
+def update_collision():
     if pygame.sprite.spritecollide(player, floor_group, False):
         player.image.fill(game.player_color)
         player.burning = False
@@ -55,38 +66,28 @@ def main():
             player.fall_in_lava()
             player.burning = True
    
-    if player.burning: player.take_burn_damage()
-        
+def update_display():
     health_display = my_font.render(str(player.health), 1, (255, 255, 0))
     game.screen.blit(health_display, (50, 50))
 
-    floor_group.draw(game.screen)
-    player_group.draw(game.screen)
-
-    pygame.display.update()
-    game.clock.tick(game.fps)
-
-def create_start_location():
+def create_map(size):
     create_island([game.middle[0], game.middle[1]])
-    paths = create_fork([game.middle[0], game.middle[1]])
-    create_fork(paths[0].destination)
-    # all paths have same destination?
-    
-def create_fork(pos):
-    paths = []
-    paths.append(create_path(pos, [0.3, 0.1]))
-    paths.append(create_path(pos, [0.1, 0.1]))
-    paths.append(create_path(pos, [-0.3, 0.1]))
-    paths.append(create_path(pos, [-0.1, 0.1]))
-    paths.append(create_path(pos, [0, 0.5]))
-    return paths
+    create_path([game.middle[0], game.middle[1]])
+    for p in paths:
+        if len(paths) >= size: break
+        for i in range(0, random.randint(1,2)):
+            create_path(p.destination)
 
-def create_path(pos, angle):
-    angle_vector = angle # TODO: degrees to angle_vector
-    new_path = Path(pos, [180, 180], angle_vector)
-    for section in new_path.sections:
-        floor_group.add(section)
-    return new_path
+def create_path(pos):
+    angles = [[0, 1], [3, 1], [-3, 1]]
+    new_path_angle = angles[random.randint(0, len(angles)-1)]
+
+    if new_path_angle == [0, 1]: new_length = random.randint(40, 80)
+    else: new_length = random.randint(80, 160)
+
+    new_path = Path(pos, [240, 240], new_length, new_path_angle)
+    for section in new_path.sections: floor_group.add(section)
+    paths.append(new_path)
 
 def create_island(pos):
     new_island = Island(pos)
