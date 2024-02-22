@@ -16,12 +16,13 @@ class Sprite(pygame.sprite.Sprite):
         self.rect.center = pos
                 
 class Player(Sprite):
-    speed = 12 
+    speed = 15 
     health = 100
     burning = False
+    move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
 
     def __init__(self, pos, size):
-        super().__init__(pos, size, game.player_color)
+        super().__init__(pos, size, game.colors.player)
 
     def movement_handler(self, floor_group):
         key = pygame.key.get_pressed()
@@ -33,7 +34,7 @@ class Player(Sprite):
         for i in range(2):
             if key[self.move[2:4][i]]:
                 for sprite in floor_group:
-                    sprite.rect.y += self.speed/2 * [1, -1][i]
+                    sprite.rect.y += self.speed * [1, -1][i]
 
     def fall_in_lava(self):
         print("lava entered")
@@ -48,14 +49,15 @@ class Path():
     sections = []
     length = 0
     destination = []
+    spread = 30
     def __init__(self, pos, size, length, angle):
         self.length = length
-        angle = [angle[0]*10, angle[1]*10]
+        angle = [angle[0]*self.spread, angle[1]*self.spread]
         for i in range(0, self.length):
             self.sections.append(
                 Sprite([pos[0] + (i*angle[0]),
                         pos[1] + (i*angle[1])],
-                       size, game.floor_color)
+                       size, game.colors.floor)
             )
             
         self.destination = [
@@ -65,7 +67,7 @@ class Path():
 
 class Island(Sprite):
     def __init__(self, pos):
-        super().__init__(pos, [512, 512], game.floor_color)
+        super().__init__(pos, [512, 512], game.colors.floor)
         self.rect.center = pos
 
 # class volcano(Sprite):
