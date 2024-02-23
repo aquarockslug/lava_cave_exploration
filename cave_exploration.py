@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import pygame
 
-from sprites import *
+from sprites import Player, Path, Island, load_game_data
 
 @dataclass
 class ColorsData:
