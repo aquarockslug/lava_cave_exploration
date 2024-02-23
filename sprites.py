@@ -1,13 +1,13 @@
 import pygame
+from random import randrange
 def load_game_data(game_data):
     global game
     game = game_data
     return game
 
 class Sprite(pygame.sprite.Sprite):
-    rect = None
-    circle = None
-    image = None
+    rect = pygame.Rect
+    image = pygame.Surface
     def __init__(self, pos, size, color):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface([size[0], size[1]])
@@ -24,50 +24,80 @@ class Player(Sprite):
     def __init__(self, pos, size):
         super().__init__(pos, size, game.colors.player)
 
-    def movement_handler(self, floor_group):
+    def movement_handler(self, path_group, paths):
         key = pygame.key.get_pressed()
         for i in range(2):
             if key[self.move[i]]:
-                for sprite in floor_group:
-                    sprite.rect.x += self.speed * [1, -1][i]
+                movement = self.speed * [1, -1][i]
+                for section in path_group:
+                    section.rect.x += movement
+                for path in paths:
+                    path.start[0] += movement 
+                    path.destination[0] += movement
 
         for i in range(2):
             if key[self.move[2:4][i]]:
-                for sprite in floor_group:
-                    sprite.rect.y += self.speed * [1, -1][i]
+                movement = self.speed * [1, -1][i]
+                for path in path_group:
+                    path.rect.y += movement
+                for path in paths:
+                    path.start[1] += movement 
+                    path.destination[1] += movement
 
     def fall_in_lava(self):
-        print("lava entered")
-        # play sound and animation
+        """ play sound and animation """
 
     def take_burn_damage(self):
-        self.image.fill((255, 0, 0))
         self.health -= 1
 
 # line of rects
 class Path():
     sections = []
     length = 0
+    angle = []
+    start = []
     destination = []
     spread = 30
+    danger_level = 1
     def __init__(self, pos, size, length, angle):
         self.length = length
+        self.angle = angle
+        self.start = [pos[0], pos[1]]
         angle = [angle[0]*self.spread, angle[1]*self.spread]
         for i in range(0, self.length):
             self.sections.append(
                 Sprite([pos[0] + (i*angle[0]),
                         pos[1] + (i*angle[1])],
-                       size, game.colors.floor)
+                       size, game.colors.path)
             )
-            
         self.destination = [
-                pos[0] + (self.length*angle[0]),
-                pos[1] + (self.length*angle[1]),
+            pos[0] + (self.length*angle[0]),
+            pos[1] + (self.length*angle[1]),
         ]
+
+    def draw_borders(self):
+        if self.angle == [0, 1]: return 
+        border = [
+            self.start,
+            self.destination
+        ]
+        pygame.draw.line(game.screen, game.colors.path, border[0], border[1], 680)
+
+    def create_hazards(self):
+        for section in self.sections:
+            if self.danger_check():
+                Volcano(section.pos)
+    
+    def danger_check(self):
+        """ More likely to be True if the danger_level is high """
+        return not randrange(100 - self.danger_level)
 
 class Island(Sprite):
     def __init__(self, pos):
-        super().__init__(pos, [512, 512], game.colors.floor)
+        super().__init__(pos, [512, 512], game.colors.path)
         self.rect.center = pos
 
-# class volcano(Sprite):
+class Volcano(Sprite):
+    def __init__(self, pos):
+        super().__init__(pos, 128, game.colors.player)
+        self.rect.center = pos
