@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 import pygame
 
-from sprites import * 
+from sprites import *
+
+debug = False
 
 @dataclass
 class ColorsData:
@@ -16,7 +18,7 @@ class ColorsData:
 
 @dataclass
 class GameData:
-    fps: int = 30 
+    fps: int = 30
     clock: pygame.time.Clock = pygame.time.Clock()
     colors = ColorsData()
     size: tuple = (1080, 1080)
@@ -26,12 +28,14 @@ class GameData:
 
 
 class LavaGame:
-    player_group, enemy_group, path_group = (
+    player_group, enemy_group, path_group, world_group = (
+        pygame.sprite.Group(),
         pygame.sprite.Group(),
         pygame.sprite.Group(),
         pygame.sprite.Group(),
     )
     paths = []
+    world = Sprite
 
     def __init__(self):
         self.data = load_game_data(GameData())
@@ -42,8 +46,11 @@ class LavaGame:
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
-
-        self.create_map(10)
+        map_size = [10000, 10000]
+        map_middle = [map_size[0]/2, map_size[1]/2]
+        self.world = Sprite(map_middle, map_size, self.data.colors.bg)
+        self.world_group.add(self.world)
+        self.create_map(50)
 
     def play(self):
         playing = True
@@ -58,18 +65,16 @@ class LavaGame:
         sys.exit()
 
     def render(self):
-        self.data.screen.fill(self.data.colors.bg)
-        self.player.movement_handler(self.path_group, self.paths)
+        self.data.screen.fill(self.data.colors.player)
+        self.world_group.draw(self.data.screen)
+        self.player.movement_handler(self.path_group, self.world_group)
         self.update_collision()
         if self.player.burning:
             self.player.take_burn_damage()
 
-        for path in self.paths:
-            path.draw_borders()
-
-        self.path_group.draw(self.data.screen)
+        if debug: self.path_group.draw(self.data.screen)
         self.player_group.draw(self.data.screen)
-        
+
         self.update_display()
         pygame.display.update()
         self.data.clock.tick(self.data.fps)
@@ -93,11 +98,16 @@ class LavaGame:
         middle = self.data.middle
         self.create_island(middle)
         self.create_path(middle)
+        # add paths until size limit is reached
         for path in self.paths:
             if len(self.paths) >= size:
                 break
+            # add 1 or 2 paths
             for _ in range(0, random.randint(1, 2)):
                 self.create_path(path.destination)
+
+        for path in self.paths:
+            path.draw_border(self.world)
 
     def create_path(self, pos):
         new_path_angle = random.choice([[0, 1], [3, 1], [-3, 1]])
@@ -114,6 +124,7 @@ class LavaGame:
     def create_island(self, pos):
         # self.path_group.add(new_island)
         pass
+
 
 if __name__ == "__main__":
     pygame.init()
