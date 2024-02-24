@@ -2,6 +2,7 @@ import pygame
 from random import randrange
 from math import sqrt
 
+
 def load_game_data(game_data):
     global game
     game = game_data
@@ -21,7 +22,7 @@ class Sprite(pygame.sprite.Sprite):
 
 
 class Player(Sprite):
-    speed = 20 
+    speed = 20
     health = 100
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
@@ -31,7 +32,7 @@ class Player(Sprite):
 
     def movement_handler(self, path_group, world_group):
         key = pygame.key.get_pressed()
-        speed = self.speed if not self.burning else self.speed/2
+        speed = self.speed if not self.burning else self.speed / 2
         for i in range(2):
             if key[self.move[i]]:
                 for section in path_group:
@@ -72,7 +73,7 @@ class Path:
         angle = [angle[0] * self.spread, angle[1] * self.spread]
         rect_size = self.thickness
         if 0 not in angle:
-            rect_size = self.thickness/sqrt(2)
+            rect_size = self.thickness / sqrt(2)
 
         for i in range(0, self.length):
             self.sections.append(

@@ -8,6 +8,7 @@ from sprites import *
 
 debug = False
 
+
 @dataclass
 class ColorsData:
     menu = (155, 166, 177)
@@ -35,7 +36,7 @@ class LavaGame:
         pygame.sprite.Group(),
     )
     paths = []
-    world = pygame.sprite.Sprite 
+    world = pygame.sprite.Sprite
 
     def __init__(self):
         self.data = load_game_data(GameData())
@@ -46,9 +47,9 @@ class LavaGame:
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
-        map_size = [30000, 10000]
-        map_middle = [map_size[0]/2, map_size[1]/2]
-        self.world = Sprite(map_middle, map_size, self.data.colors.bg)
+        world_size = [10000, 10000]
+        world_pos = [world_size[0] / 2, world_size[1] / 2]
+        self.world = Sprite(world_pos, world_size, self.data.colors.bg)
         self.world_group.add(self.world)
         self.create_map(50)
 
@@ -72,7 +73,8 @@ class LavaGame:
         if self.player.burning:
             self.player.take_burn_damage()
 
-        if debug: self.path_group.draw(self.data.screen)
+        if debug:
+            self.path_group.draw(self.data.screen)
         self.player_group.draw(self.data.screen)
 
         self.update_display()
@@ -97,7 +99,7 @@ class LavaGame:
     def create_map(self, size):
         middle = self.data.middle
         self.create_island(middle, 500)
-        self.create_path(middle, 300)
+        self.create_path(middle, 400)
         # add paths until size limit is reached
         for path in self.paths:
             if len(self.paths) >= size:
@@ -122,7 +124,7 @@ class LavaGame:
     def create_island(self, pos, size):
         new_island = Island(pos, size)
         self.path_group.add(new_island)
-        self.world.image.blit(new_island.image, [pos[0] - size/2, pos[1] - size/2])
+        self.world.image.blit(new_island.image, [pos[0] - size / 2, pos[1] - size / 2])
 
 
 if __name__ == "__main__":
