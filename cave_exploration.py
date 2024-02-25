@@ -37,7 +37,7 @@ class LavaGame:
     def __init__(self):
         self.data = load_game_data(GameData())
         self.data.font = pygame.font.SysFont("monospace", 42)
-        self.player: Player = Player(self.data.middle, [20, 20])
+        self.player: Player = Player(self.data.middle, [50, 50])
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
@@ -86,7 +86,6 @@ class LavaGame:
         player = self.player
 
         if pygame.sprite.spritecollide(player, self.path_group, False):
-            player.image.fill(self.data.colors.player)
             player.burning = False
         else:
             player.burning = True
@@ -102,7 +101,7 @@ class LavaGame:
                 
         def generate_path():
             self.create_path(path.destination, 200)
-            self.create_island(path.destination, 300)
+            self.create_island(path.destination, 400)
             if not random.randrange(0, 3):
                 self.create_path(path.destination, 100)
 

@@ -12,6 +12,7 @@ def load_game_data(game_data):
 class Sprite(pygame.sprite.Sprite):
     rect = pygame.Rect
     image = pygame.Surface
+    size = []
 
     def __init__(self, pos, size, color):
         pygame.sprite.Sprite.__init__(self)
@@ -19,16 +20,20 @@ class Sprite(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.size = size
 
 
 class Player(Sprite):
-    speed = 10
+    speed = 8
     health = 200
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
+    
 
     def __init__(self, pos, size):
         super().__init__(pos, size, game.colors.player)
+        tank_image = pygame.image.load("assets/tank.png")
+        self.image = pygame.transform.scale(tank_image, self.size)
 
     def fall_in_lava(self):
         """play sound and animation"""
