@@ -22,7 +22,7 @@ class Sprite(pygame.sprite.Sprite):
 
 
 class Player(Sprite):
-    speed = 12
+    speed = 10
     health = 100
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
@@ -90,8 +90,13 @@ class Path:
             pos[1] + (self.length * angle[1]),
         ]
 
-    def draw_border(self, world):
-        """draws a line from start to destination on the world Sprite"""
+    def draw_path(self, world):
+        """draws a path from start to destination on the world"""
+        # pygame.draw.line(world.image, (165, 42, 42),
+            # self.start,
+            # self.destination,
+            # self.thickness,
+        # )
         pygame.draw.line(
             world.image,
             game.colors.path,

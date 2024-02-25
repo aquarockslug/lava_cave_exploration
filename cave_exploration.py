@@ -76,7 +76,7 @@ class LavaGame:
         sys.exit()
 
     def render(self):
-        self.data.screen.fill(self.data.colors.player)
+        self.data.screen.fill(self.data.colors.bg)
         self.world_group.draw(self.data.screen)
         self.player.movement_handler(self.path_group, self.world_group)
         self.update_collision()
@@ -110,23 +110,24 @@ class LavaGame:
         middle = self.data.middle
         self.create_island(middle, 600)
         self.create_path(middle, 400)
+
         # add paths until size limit is reached
         for path in self.paths:
             if len(self.paths) >= size:
                 break
-            # add 1 or 2 paths
-            for _ in range(0, random.randint(1, 2)):
+           
+            self.create_path(path.destination, 400)
+            self.create_island(path.destination, 400)
+            if not random.randrange(0, 5):
                 self.create_path(path.destination, 400)
-                self.create_island(path.destination, 200)
+                self.create_island(path.destination, 400)
 
         for path in self.paths:
-            path.draw_border(self.world)
+            path.draw_path(self.world)
 
     def create_path(self, pos, thickness):
-        new_path_angle = random.choice([[0, 1], [1, 3], [1, 1], [3, 1], [1, 0]])
-        new_length = random.choice([100, 120, 140])
-        if 0 in new_path_angle:
-            new_length += 40
+        new_path_angle = random.choice([[0, 1], [1, 1], [1, 0]])
+        new_length = random.choice([20, 40, 60])
         new_path = Path(pos, thickness, new_length, new_path_angle)
         for section in new_path.sections:
             self.path_group.add(section)
