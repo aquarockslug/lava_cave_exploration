@@ -47,10 +47,20 @@ class LavaGame:
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
-        world_size = [20000, 20000]
+        world_size = [10000, 10000]
         world_pos = [world_size[0] / 2, world_size[1] / 2]
+
         self.world = Sprite(world_pos, world_size, self.data.colors.bg)
         self.world_group.add(self.world)
+
+        lava_image = pygame.image.load("assets/fire.png")
+        tile_size = [world_size[0] / 32, world_size[0] / 32]
+        tile = pygame.transform.scale(lava_image, tile_size)
+        self.world.image.fill(self.data.colors.bg)
+
+        for r in range(0, 32):
+            for c in range(0, 32):
+                self.world.image.blit(tile, [c * tile_size[0], r * tile_size[0]])
         self.create_map(50)
 
     def play(self):
