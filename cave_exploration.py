@@ -52,16 +52,16 @@ class LavaGame:
 
         self.world = Sprite(world_pos, world_size, self.data.colors.bg)
         self.world_group.add(self.world)
-
-        lava_image = pygame.image.load("assets/fire.png")
-        tile_size = [world_size[0] / 32, world_size[0] / 32]
-        tile = pygame.transform.scale(lava_image, tile_size)
         self.world.image.fill(self.data.colors.bg)
-
-        for r in range(0, 32):
-            for c in range(0, 32):
-                self.world.image.blit(tile, [c * tile_size[0], r * tile_size[0]])
+        self.tile(self.world.image, pygame.image.load("assets/fire.png"), 64)
         self.create_map(50)
+
+    def tile(self, surface, image, tile_size):
+        tile = pygame.transform.scale(image, [tile_size, tile_size])
+        for row in range(0, int(surface.get_height() / tile_size)):
+            for col in range(0, int(surface.get_width() / tile_size)):
+                surface.blit(tile, [col * tile_size, row * tile_size])
+            
 
     def play(self):
         playing = True
@@ -107,28 +107,30 @@ class LavaGame:
         self.data.screen.blit(self.health_display, (50, 50))
 
     def create_map(self, size):
-        middle = self.data.middle
-        self.create_island(middle, 600)
-        self.create_path(middle, 400)
+        screen_middle = self.data.middle
+        self.create_island(screen_middle, 300)
+        self.create_path(screen_middle, 200)
 
         # add paths until size limit is reached
         for path in self.paths:
             if len(self.paths) >= size:
                 break
            
-            self.create_path(path.destination, 400)
-            self.create_island(path.destination, 400)
+            self.create_path(path.destination, 200)
+            self.create_island(path.destination, 300)
             if not random.randrange(0, 5):
-                self.create_path(path.destination, 400)
-                self.create_island(path.destination, 400)
+                self.create_path(path.destination, 100)
 
         for path in self.paths:
             path.draw_path(self.world)
 
     def create_path(self, pos, thickness):
-        new_path_angle = random.choice([[0, 1], [1, 1], [1, 0]])
-        new_length = random.choice([20, 40, 60])
-        new_path = Path(pos, thickness, new_length, new_path_angle)
+        new_path_angle = random.choice([[0, 1], [1, 3], [1, 1], [3, 1], [1, 0]])
+        new_length = random.choice([20, 40])
+        if 0 in new_path_angle:
+            new_length += 20
+        new_thickness = int(thickness*sqrt(2)) if new_path_angle == [1, 1] else thickness
+        new_path = Path(pos, new_thickness, new_length, new_path_angle)
         for section in new_path.sections:
             self.path_group.add(section)
         self.paths.append(new_path)
