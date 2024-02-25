@@ -1,13 +1,9 @@
 import random
 import sys
 from dataclasses import dataclass
-
 import pygame
 
 from sprites import *
-
-debug = False
-
 
 @dataclass
 class ColorsData:
@@ -41,9 +37,7 @@ class LavaGame:
     def __init__(self):
         self.data = load_game_data(GameData())
         self.data.font = pygame.font.SysFont("monospace", 42)
-        self.player: Player = Player(
-            [self.data.middle[0], self.data.middle[1]], [20, 20]
-        )
+        self.player: Player = Player(self.data.middle, [20, 20])
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
@@ -52,11 +46,9 @@ class LavaGame:
 
         self.world = Sprite(world_pos, world_size, self.data.colors.bg)
         self.world_group.add(self.world)
-        self.world.image.fill(self.data.colors.bg)
-        self.tile(self.world.image, pygame.image.load("assets/fire.png"), 64)
-        self.create_map(50)
+        self.generate_world(25)
 
-    def tile(self, surface, image, tile_size):
+    def tile_surface(self, surface, image, tile_size):
         tile = pygame.transform.scale(image, [tile_size, tile_size])
         for row in range(0, int(surface.get_height() / tile_size)):
             for col in range(0, int(surface.get_width() / tile_size)):
@@ -83,8 +75,7 @@ class LavaGame:
         if self.player.burning:
             self.player.take_burn_damage()
 
-        if debug:
-            self.path_group.draw(self.data.screen)
+        # self.path_group.draw(self.data.screen)
         self.player_group.draw(self.data.screen)
 
         self.update_display()
@@ -102,34 +93,37 @@ class LavaGame:
 
     def update_display(self):
         self.health_display = self.data.font.render(
-            str(self.player.health), 1, (255, 255, 0)
+            str(self.player.health), 1, (0, 0, 0)
         )
         self.data.screen.blit(self.health_display, (50, 50))
 
-    def create_map(self, size):
-        screen_middle = self.data.middle
-        self.create_island(screen_middle, 300)
-        self.create_path(screen_middle, 200)
-
-        # add paths until size limit is reached
-        for path in self.paths:
-            if len(self.paths) >= size:
-                break
-           
+    def generate_world(self, size):
+        self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
+                
+        def generate_path():
             self.create_path(path.destination, 200)
             self.create_island(path.destination, 300)
-            if not random.randrange(0, 5):
+            if not random.randrange(0, 3):
                 self.create_path(path.destination, 100)
+
+        # add paths until size limit is reached
+        self.create_island(self.data.middle, 300)
+        self.create_path(self.data.middle, 200)
+        for path in self.paths:
+            generate_path()
+            if len(self.paths) >= size:
+                break 
 
         for path in self.paths:
             path.draw_path(self.world)
-
+        
     def create_path(self, pos, thickness):
         new_path_angle = random.choice([[0, 1], [1, 3], [1, 1], [3, 1], [1, 0]])
+        new_thickness = int(thickness*sqrt(2)) if new_path_angle == [1, 1] else thickness
         new_length = random.choice([20, 40])
         if 0 in new_path_angle:
-            new_length += 20
-        new_thickness = int(thickness*sqrt(2)) if new_path_angle == [1, 1] else thickness
+            new_length *= 2
+
         new_path = Path(pos, new_thickness, new_length, new_path_angle)
         for section in new_path.sections:
             self.path_group.add(section)

@@ -23,35 +23,40 @@ class Sprite(pygame.sprite.Sprite):
 
 class Player(Sprite):
     speed = 10
-    health = 100
+    health = 200
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
 
     def __init__(self, pos, size):
         super().__init__(pos, size, game.colors.player)
 
-    def movement_handler(self, path_group, world_group):
-        key = pygame.key.get_pressed()
-        speed = self.speed if not self.burning else self.speed / 2
-        for i in range(2):
-            if key[self.move[i]]:
-                for section in path_group:
-                    section.rect.x += speed * [1, -1][i]
-                for scenery in world_group:
-                    scenery.rect.x += speed * [1, -1][i]
-
-        for i in range(2):
-            if key[self.move[2:4][i]]:
-                for path in path_group:
-                    path.rect.y += speed * [1, -1][i]
-                for scenery in world_group:
-                    scenery.rect.y += speed * [1, -1][i]
-
     def fall_in_lava(self):
         """play sound and animation"""
 
     def take_burn_damage(self):
         self.health -= 1
+
+    def movement_handler(self, path_group, world_group):
+        """moves all sprites in the groups"""
+        key = pygame.key.get_pressed()
+        speed = self.speed if not self.burning else self.speed / 2
+
+        def move_group(group, i, is_x_axis):
+            for element in group:
+                if is_x_axis:
+                    element.rect.x += speed * [1, -1][i]
+                else:
+                    element.rect.y += speed * [1, -1][i]
+
+        for i in range(2):
+            if key[self.move[i]]:
+                move_group(path_group, i, True)
+                move_group(world_group, i, True)
+
+        for i in range(2):
+            if key[self.move[2:4][i]]:
+                move_group(path_group, i, False)
+                move_group(world_group, i, False)
 
 
 class Path:
@@ -90,13 +95,14 @@ class Path:
             pos[1] + (self.length * angle[1]),
         ]
 
-    def draw_path(self, world):
+    def draw_path(self, world, border_style=False):
         """draws a path from start to destination on the world"""
-        # pygame.draw.line(world.image, (165, 42, 42),
-            # self.start,
-            # self.destination,
-            # self.thickness,
-        # )
+        if border_style:
+            pygame.draw.line(world.image, (165, 42, 42),
+                self.start,
+                self.destination,
+                self.thickness,
+            )
         pygame.draw.line(
             world.image,
             game.colors.path,
