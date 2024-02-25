@@ -21,7 +21,7 @@ class GameData:
     size: tuple = (1080, 1080)
     middle: tuple = (size[0] / 2, size[1] / 2)
     screen: pygame.Surface = pygame.display.set_mode([size[0], size[1]])
-    font = pygame.font.SysFont("monospace", 42)
+    font = None
 
 
 class LavaGame:
@@ -34,9 +34,9 @@ class LavaGame:
     paths = []
     world = pygame.sprite.Sprite
 
-    def __init__(self, game_data):
-        pygame.init()
-        self.data = load_game_data(game_data)
+    def __init__(self):
+        self.data = load_game_data(GameData())
+        self.data.font = pygame.font.SysFont("monospace", 42)
         self.player: Player = Player(self.data.middle, [50, 50])
 
         self.player_group.add(self.player)
@@ -103,7 +103,7 @@ class LavaGame:
                 
         def generate_path():
             self.create_path(path.destination, 200)
-            self.create_island(path.destination, 200)
+            self.create_island(path.destination, 250)
             if not random.randrange(0, 2):
                 self.create_path(path.destination, 100)
                 self.create_island(path.destination, 400)
@@ -138,4 +138,5 @@ class LavaGame:
 
 
 if __name__ == "__main__":
-    LavaGame(GameData()).play()
+    pygame.init()
+    LavaGame().play()
