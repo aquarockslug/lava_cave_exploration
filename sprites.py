@@ -22,7 +22,7 @@ class Sprite(pygame.sprite.Sprite):
 
 
 class Player(Sprite):
-    speed = 20
+    speed = 12
     health = 100
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
@@ -60,7 +60,7 @@ class Path:
     sections = []
     length = 0
     angle = []
-    spread = 10
+    spread = 15
     danger_level = 1
     thickness = 0
 
@@ -70,11 +70,13 @@ class Path:
         self.start = [pos[0], pos[1]]
         self.thickness = thickness
 
-        angle = [angle[0] * self.spread, angle[1] * self.spread]
         rect_size = self.thickness
         if 0 not in angle:
             rect_size = self.thickness / sqrt(2)
+        if angle == [1, 1]:
+            rect_size -= 100
 
+        angle = [angle[0] * self.spread, angle[1] * self.spread]
         for i in range(0, self.length):
             self.sections.append(
                 Sprite(

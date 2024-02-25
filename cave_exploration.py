@@ -47,7 +47,7 @@ class LavaGame:
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
-        world_size = [10000, 10000]
+        world_size = [20000, 20000]
         world_pos = [world_size[0] / 2, world_size[1] / 2]
         self.world = Sprite(world_pos, world_size, self.data.colors.bg)
         self.world_group.add(self.world)
@@ -98,7 +98,7 @@ class LavaGame:
 
     def create_map(self, size):
         middle = self.data.middle
-        self.create_island(middle, 500)
+        self.create_island(middle, 600)
         self.create_path(middle, 400)
         # add paths until size limit is reached
         for path in self.paths:
@@ -107,15 +107,16 @@ class LavaGame:
             # add 1 or 2 paths
             for _ in range(0, random.randint(1, 2)):
                 self.create_path(path.destination, 400)
-                self.create_island(path.destination, 400)
+                self.create_island(path.destination, 200)
 
         for path in self.paths:
             path.draw_border(self.world)
 
     def create_path(self, pos, thickness):
-        new_path_angle = random.choice([[0, 1], [3, 1], [1, 0]])
-        new_length = random.choice([100, 110, 120])
-
+        new_path_angle = random.choice([[0, 1], [1, 3], [1, 1], [3, 1], [1, 0]])
+        new_length = random.choice([100, 120, 140])
+        if 0 in new_path_angle:
+            new_length += 40
         new_path = Path(pos, thickness, new_length, new_path_angle)
         for section in new_path.sections:
             self.path_group.add(section)
