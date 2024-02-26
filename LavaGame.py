@@ -18,7 +18,7 @@ class GameData:
     fps: int = 30
     clock: pygame.time.Clock = pygame.time.Clock()
     colors = ColorsData()
-    size: tuple = (1080, 1080)
+    size: tuple = (720, 720)
     middle: tuple = (size[0] / 2, size[1] / 2)
     screen: pygame.Surface = pygame.display.set_mode([size[0], size[1]])
     font = None

@@ -43,8 +43,13 @@ class Player(Sprite):
 
     def key_count(self, keys):
         amount_pressed = 0
-        for key in keys:
-            if key:
+        if keys[self.move[0]]:
+                amount_pressed += 1
+        if keys[self.move[1]]:
+                amount_pressed += 1
+        if keys[self.move[2]]:
+                amount_pressed += 1
+        if keys[self.move[3]]:
                 amount_pressed += 1
         return amount_pressed
 
