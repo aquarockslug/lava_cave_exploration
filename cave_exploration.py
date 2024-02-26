@@ -1,28 +1,7 @@
 import random
-import sys
-from dataclasses import dataclass
 import pygame
 
 from sprites import *
-
-@dataclass
-class ColorsData:
-    menu = (155, 166, 177)
-    bg = (20, 20, 20)
-    player = (250, 26, 142)
-    path = (87, 93, 94)
-
-
-@dataclass
-class GameData:
-    fps: int = 30
-    clock: pygame.time.Clock = pygame.time.Clock()
-    colors = ColorsData()
-    size: tuple = (1080, 1080)
-    middle: tuple = (size[0] / 2, size[1] / 2)
-    screen: pygame.Surface = pygame.display.set_mode([size[0], size[1]])
-    font = pygame.font.SysFont("monospace", 42)
-
 
 class LavaGame:
     player_group, enemy_group, path_group, world_group = (
@@ -40,13 +19,12 @@ class LavaGame:
         self.player: Player = Player(self.data.middle, [50, 50])
 
         self.player_group.add(self.player)
-        self.health_display = self.data.font.render("100", 1, (255, 255, 255))
-        world_size = [10000, 10000]
+        world_size = [7000, 7000]
         world_pos = [world_size[0] / 2, world_size[1] / 2]
 
-        self.world = Sprite(world_pos, world_size, self.data.colors.bg)
+        self.world = Sprite(world_pos, world_size, self.data.colors.victory)
         self.world_group.add(self.world)
-        self.generate_world(50)
+        self.generate_world(100)
 
     def tile_surface(self, surface, image, tile_size):
         tile = pygame.transform.scale(image, [tile_size, tile_size])
@@ -65,11 +43,10 @@ class LavaGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     playing = False
-        sys.exit()
 
     def render(self):
         key = pygame.key.get_pressed()
-        self.data.screen.fill(self.data.colors.bg)
+        self.data.screen.fill(self.data.colors.victory)
         self.world_group.draw(self.data.screen)
         self.player.movement_handler(key, self.path_group, self.world_group)
         self.player.update_direction(key)
@@ -77,7 +54,7 @@ class LavaGame:
         if self.player.burning:
             self.player.take_burn_damage()
 
-        # self.path_group.draw(self.data.screen)
+        self.path_group.draw(self.data.screen)
         self.player_group.draw(self.data.screen)
 
         self.update_display()
@@ -93,12 +70,12 @@ class LavaGame:
             player.burning = True
 
     def update_display(self):
-        self.health_display = self.data.font.render(
+        health_display = pygame.font.SysFont(self.data.font, 42).render(
             str(self.player.health), 1, (0, 0, 0)
         )
-        self.data.screen.blit(self.health_display, (50, 50))
+        self.data.screen.blit(health_display, (50, 50))
 
-    def generate_world(self, size):
+    def generate_world(self, path_limit):
         self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
                 
         def generate_path():
@@ -113,7 +90,7 @@ class LavaGame:
         self.create_path(self.data.middle, 200)
         for path in self.paths:
             generate_path()
-            if len(self.paths) >= size:
+            if len(self.paths) >= path_limit:
                 break 
 
         for path in self.paths:
@@ -135,7 +112,3 @@ class LavaGame:
         new_island = Island(pos, size)
         self.path_group.add(new_island)
         self.world.image.blit(new_island.image, [pos[0] - size / 2, pos[1] - size / 2])
-
-
-if __name__ == "__main__":
-    LavaGame(GameData()).play()
