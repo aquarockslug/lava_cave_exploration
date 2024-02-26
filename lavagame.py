@@ -1,9 +1,11 @@
 import random
 import sys
+from math import sqrt
 from dataclasses import dataclass
 import pygame
 
-from sprites import *
+from paths import Path, Island 
+from player import Player
 
 @dataclass
 class ColorsData:
@@ -23,6 +25,20 @@ class GameData:
     screen: pygame.Surface = pygame.display.set_mode([size[0], size[1]])
     font = None
 
+class Sprite(pygame.sprite.Sprite):
+    rect = pygame.Rect
+    image = pygame.Surface
+    size = []
+
+    def __init__(self, pos, size, color):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([size[0], size[1]])
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.size = size
+
+
 
 class LavaGame:
     player_group, enemy_group, path_group, world_group = (
@@ -35,9 +51,9 @@ class LavaGame:
     world = pygame.sprite.Sprite
 
     def __init__(self):
-        self.data = load_game_data(GameData())
+        self.data = GameData()
         self.data.font = pygame.font.SysFont("monospace", 42)
-        self.player: Player = Player(self.data.middle, [50, 50])
+        self.player: Player = Player(self.data, self.data.middle, [50, 50])
 
         self.player_group.add(self.player)
         self.health_display = self.data.font.render("100", 1, (255, 255, 255))
@@ -117,7 +133,7 @@ class LavaGame:
                 break 
 
         for path in self.paths:
-            path.draw_path(self.world)
+            path.draw_path(self.data, self.world)
         
     def create_path(self, pos, thickness):
         new_path_angle = random.choice([[0, 1], [1, 1], [1, 0]])
@@ -126,13 +142,13 @@ class LavaGame:
         if 0 in new_path_angle:
             new_length *= 2
 
-        new_path = Path(pos, new_thickness, new_length, new_path_angle)
+        new_path = Path(self.data, pos, new_thickness, new_length, new_path_angle)
         for section in new_path.sections:
             self.path_group.add(section)
         self.paths.append(new_path)
 
     def create_island(self, pos, size):
-        new_island = Island(pos, size)
+        new_island = Island(self.data, pos, size)
         self.path_group.add(new_island)
         self.world.image.blit(new_island.image, [pos[0] - size / 2, pos[1] - size / 2])
 

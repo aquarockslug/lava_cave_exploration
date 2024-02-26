@@ -1,7 +1,7 @@
-import pygame
 import sys
-from lavagame import LavaGame
 from dataclasses import dataclass
+import pygame
+from lavagame import LavaGame
 
 @dataclass
 class ColorsData:
@@ -13,7 +13,7 @@ class ColorsData:
 
 @dataclass
 class GameData:
-    fps: int = 29
+    fps: int = 30 
     clock: pygame.time.Clock = pygame.time.Clock()
     colors = ColorsData()
     size: tuple = (1079, 1080)
