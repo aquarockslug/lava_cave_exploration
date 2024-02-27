@@ -23,6 +23,6 @@ class GameData:
 
 if __name__ == "__main__":
     pygame.init()
-    LavaGame().play()
+    LavaGame(GameData()).play()
     pygame.quit()
     sys.exit()

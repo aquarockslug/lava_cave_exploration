@@ -1,29 +1,11 @@
 import random
 import sys
 from math import sqrt
-from dataclasses import dataclass
 import pygame
 
-from paths import Path, Island 
+from paths import Path, Island
 from player import Player
 
-@dataclass
-class ColorsData:
-    menu = (155, 166, 177)
-    bg = (20, 20, 20)
-    player = (250, 26, 142)
-    path = (87, 93, 94)
-
-
-@dataclass
-class GameData:
-    fps: int = 30
-    clock: pygame.time.Clock = pygame.time.Clock()
-    colors = ColorsData()
-    size: tuple = (1080, 1080)
-    middle: tuple = (size[0] / 2, size[1] / 2)
-    screen: pygame.Surface = pygame.display.set_mode([size[0], size[1]])
-    font = None
 
 class Sprite(pygame.sprite.Sprite):
     rect = pygame.Rect
@@ -39,7 +21,6 @@ class Sprite(pygame.sprite.Sprite):
         self.size = size
 
 
-
 class LavaGame:
     player_group, enemy_group, path_group, world_group = (
         pygame.sprite.Group(),
@@ -50,17 +31,17 @@ class LavaGame:
     paths = []
     world = pygame.sprite.Sprite
 
-    def __init__(self):
-        self.data = GameData()
+    def __init__(self, gamedata):
+        self.data = gamedata 
         self.data.font = pygame.font.SysFont("monospace", 42)
+        self.health_display = self.data.font.render("200", 1, (255, 255, 255))
+        
         self.player: Player = Player(self.data, self.data.middle, [50, 50])
-
         self.player_group.add(self.player)
-        self.health_display = self.data.font.render("100", 1, (255, 255, 255))
-        world_size = [10000, 10000]
-        world_pos = [world_size[0] / 2, world_size[1] / 2]
-
-        self.world = Sprite(world_pos, world_size, self.data.colors.bg)
+        
+        self.world_size = [7500, 7500]
+        self.world_pos = [self.world_size[0] / 2, self.world_size[1] / 2]
+        self.world = Sprite(self.world_pos, self.world_size, self.data.colors.victory)
         self.world_group.add(self.world)
         self.generate_world(50)
 
@@ -69,7 +50,6 @@ class LavaGame:
         for row in range(0, int(surface.get_height() / tile_size)):
             for col in range(0, int(surface.get_width() / tile_size)):
                 surface.blit(tile, [col * tile_size, row * tile_size])
-            
 
     def play(self):
         playing = True
@@ -85,7 +65,7 @@ class LavaGame:
 
     def render(self):
         key = pygame.key.get_pressed()
-        self.data.screen.fill(self.data.colors.bg)
+        self.data.screen.fill((0, 0, 0))
         self.world_group.draw(self.data.screen)
         self.player.movement_handler(key, self.path_group, self.world_group)
         self.player.update_direction(key)
@@ -102,11 +82,26 @@ class LavaGame:
 
     def update_collision(self):
         player = self.player
+        world = self.world.rect
+        
+        if world.x < -self.world_size[0] + 325 or world.y < -self.world_size[1] + 325:
+            player.burning = False
+            print("victory")
+            return
 
         if pygame.sprite.spritecollide(player, self.path_group, False):
             player.burning = False
         else:
             player.burning = True
+
+    def create_world_border(self):
+        bottom_border_pos = [self.world_pos[0], (self.world_pos[1] * 2) + 500]
+        bottom_border = Sprite(bottom_border_pos, [self.world_size[0], 1000], self.data.colors.victory)  
+        self.world_group.add(bottom_border)
+        top_border_pos = [(self.world_pos[0] * 2) + 500, self.world_pos[1]]
+        top_border = Sprite(top_border_pos, [self.world_size[0], 1000], self.data.colors.victory)  
+        self.world_group.add(top_border)
+
 
     def update_display(self):
         self.health_display = self.data.font.render(
@@ -114,13 +109,16 @@ class LavaGame:
         )
         self.data.screen.blit(self.health_display, (50, 50))
 
-    def generate_world(self, size):
+    def generate_world(self, path_limit):
         self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
-                
+
         def generate_path():
-            self.create_path(path.destination, 200)
+            self.create_path(path.destination, 250)
             self.create_island(path.destination, 250)
-            if not random.randrange(0, 2):
+            if not random.randrange(0, 4):
+                self.create_path(path.destination, 100)
+                self.create_island(path.destination, 400)
+            if len(self.paths) < path_limit/3 and not random.randrange(0, 4):
                 self.create_path(path.destination, 100)
                 self.create_island(path.destination, 400)
 
@@ -129,15 +127,19 @@ class LavaGame:
         self.create_path(self.data.middle, 200)
         for path in self.paths:
             generate_path()
-            if len(self.paths) >= size:
-                break 
+            if len(self.paths) >= path_limit:
+                break
 
         for path in self.paths:
             path.draw_path(self.data, self.world)
         
+        self.create_world_border()
+
     def create_path(self, pos, thickness):
         new_path_angle = random.choice([[0, 1], [1, 1], [1, 0]])
-        new_thickness = int(thickness*sqrt(2)) if new_path_angle == [1, 1] else thickness
+        new_thickness = (
+            int(thickness * sqrt(2)) if new_path_angle == [1, 1] else thickness
+        )
         new_length = random.choice([30, 60])
         if 0 in new_path_angle:
             new_length *= 2
