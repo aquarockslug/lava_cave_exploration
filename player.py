@@ -28,6 +28,7 @@ class Player(Sprite):
 
     def fall_in_lava(self):
         """play sound and animation"""
+        print("fell in lava")
 
     def take_burn_damage(self):
         self.health -= 1

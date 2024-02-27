@@ -30,20 +30,21 @@ class LavaGame:
     )
     paths = []
     world = pygame.sprite.Sprite
+    burned_last_frame = False
 
     def __init__(self, gamedata):
-        self.data = gamedata 
+        self.data = gamedata
         self.data.font = pygame.font.SysFont("monospace", 42)
         self.health_display = self.data.font.render("200", 1, (255, 255, 255))
-        
+
         self.player: Player = Player(self.data, self.data.middle, [50, 50])
         self.player_group.add(self.player)
-        
+
         self.world_size = [7500, 7500]
         self.world_pos = [self.world_size[0] / 2, self.world_size[1] / 2]
         self.world = Sprite(self.world_pos, self.world_size, self.data.colors.victory)
         self.world_group.add(self.world)
-        self.generate_world(50)
+        self.generate_world(100)
 
     def tile_surface(self, surface, image, tile_size):
         tile = pygame.transform.scale(image, [tile_size, tile_size])
@@ -69,9 +70,16 @@ class LavaGame:
         self.world_group.draw(self.data.screen)
         self.player.movement_handler(key, self.path_group, self.world_group)
         self.player.update_direction(key)
-        self.update_collision()
-        if self.player.burning:
-            self.player.take_burn_damage()
+
+        if not self.victory_condition(self.world.rect):
+            self.update_collision()
+            if self.player.burning and not self.burned_last_frame:
+                self.player.fall_in_lava()
+            if self.player.burning:
+                self.player.take_burn_damage()
+                self.burned_last_frame = True
+            else:
+                self.burned_last_frame = False
 
         # self.path_group.draw(self.data.screen)
         self.player_group.draw(self.data.screen)
@@ -81,27 +89,36 @@ class LavaGame:
         self.data.clock.tick(self.data.fps)
 
     def update_collision(self):
-        player = self.player
-        world = self.world.rect
-        
-        if world.x < -self.world_size[0] + 325 or world.y < -self.world_size[1] + 325:
-            player.burning = False
-            print("victory")
-            return
-
-        if pygame.sprite.spritecollide(player, self.path_group, False):
-            player.burning = False
+        if pygame.sprite.spritecollide(self.player, self.path_group, False):
+            self.player.burning = False
         else:
-            player.burning = True
+            self.player.burning = True
+
+    def victory_condition(self, rect):
+        if rect.x < -self.world_size[0] + 500 or rect.y < -self.world_size[1] + 500:
+            self.player.burning = False
+            print("victory")
+            return True
+        return False
 
     def create_world_border(self):
-        bottom_border_pos = [self.world_pos[0], (self.world_pos[1] * 2) + 500]
-        bottom_border = Sprite(bottom_border_pos, [self.world_size[0], 1000], self.data.colors.victory)  
+        bottom_border_pos = [self.world_pos[0], (self.world_pos[1] * 2) + 512]
+        bottom_border = Sprite(
+            bottom_border_pos, [self.world_size[0], 1024], self.data.colors.victory
+        )
+        self.tile_surface(
+            bottom_border.image, pygame.image.load("assets/basalt.png"), 512
+        )
         self.world_group.add(bottom_border)
-        top_border_pos = [(self.world_pos[0] * 2) + 500, self.world_pos[1]]
-        top_border = Sprite(top_border_pos, [self.world_size[0], 1000], self.data.colors.victory)  
-        self.world_group.add(top_border)
 
+        right_border_pos = [(self.world_pos[0] * 2) + 512, self.world_pos[1]]
+        right_border = Sprite(
+            right_border_pos, [1024, self.world_size[0]], self.data.colors.victory
+        )
+        self.tile_surface(
+            right_border.image, pygame.image.load("assets/basalt.png"), 512
+        )
+        self.world_group.add(right_border)
 
     def update_display(self):
         self.health_display = self.data.font.render(
@@ -115,24 +132,33 @@ class LavaGame:
         def generate_path():
             self.create_path(path.destination, 250)
             self.create_island(path.destination, 250)
-            if not random.randrange(0, 4):
+            if not random.randrange(0, 2):
                 self.create_path(path.destination, 100)
                 self.create_island(path.destination, 400)
-            if len(self.paths) < path_limit/3 and not random.randrange(0, 4):
+            if len(self.paths) < path_limit / 3 and not random.randrange(0, 2):
                 self.create_path(path.destination, 100)
                 self.create_island(path.destination, 400)
 
         # add paths until size limit is reached
         self.create_island(self.data.middle, 400)
         self.create_path(self.data.middle, 200)
+        victory_island_count = 0
         for path in self.paths:
             generate_path()
-            if len(self.paths) >= path_limit:
+            if (
+                path.destination[0] > self.world_size[0]
+                or path.destination[1] > self.world_size[1]
+            ):
+                victory_island_count += 1
+            print(victory_island_count)
+            if victory_island_count > 0 and len(self.paths) >= path_limit:
+                break
+            if victory_island_count >= 5:
                 break
 
         for path in self.paths:
             path.draw_path(self.data, self.world)
-        
+
         self.create_world_border()
 
     def create_path(self, pos, thickness):

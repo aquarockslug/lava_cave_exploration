@@ -8,7 +8,8 @@ class ColorsData:
     menu = (154, 166, 177)
     victory = (255, 0, 0)
     player = (249, 26, 142)
-    path = (86, 93, 94)
+    path = (98, 21, 36)
+    path_cool = (86, 93, 94)
 
 
 @dataclass
