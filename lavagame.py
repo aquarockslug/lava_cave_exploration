@@ -46,15 +46,9 @@ class LavaGame:
 
         self.player: Player = Player(self.data.middle, [50, 50])
         self.player_group.add(self.player)
-        
-
-    def tile_surface(self, surface, image, tile_size):
-        tile = pygame.transform.scale(image, [tile_size, tile_size])
-        for row in range(0, int(surface.get_height() / tile_size)):
-            for col in range(0, int(surface.get_width() / tile_size)):
-                surface.blit(tile, [col * tile_size, row * tile_size])
 
     def play(self):
+        """main gameplay loop"""
         self.ambient_sound.play(-1)
         playing = True
         while playing:
@@ -68,6 +62,7 @@ class LavaGame:
         sys.exit()
 
     def render(self):
+        """renders a frame of the game"""
         key = pygame.key.get_pressed()
         self.data.screen.fill((0, 0, 0))
         self.world_group.draw(self.data.screen)
@@ -94,12 +89,21 @@ class LavaGame:
         self.data.clock.tick(self.data.fps)
 
     def update_collision(self):
+        """updates player burning"""
         if pygame.sprite.spritecollide(self.player, self.path_group, False):
             self.player.burning = False
         else:
             self.player.burning = True
 
+    def tile_surface(self, surface, image, tile_size):
+        """cover a surface with tiles"""
+        tile = pygame.transform.scale(image, [tile_size, tile_size])
+        for row in range(0, int(surface.get_height() / tile_size)):
+            for col in range(0, int(surface.get_width() / tile_size)):
+                surface.blit(tile, [col * tile_size, row * tile_size])
+
     def victory_condition(self, rect):
+        """check if the player has reached the world border"""
         if rect.x < -self.world_size[0] + 500 or rect.y < -self.world_size[1] + 500:
             self.player.burning = False
             print("victory")
@@ -107,6 +111,7 @@ class LavaGame:
         return False
 
     def create_world_border(self):
+        """creates a tiled border around the world"""
         bottom_border_pos = [self.world_pos[0], (self.world_pos[1] * 2) + 512]
         bottom_border = Sprite(
             bottom_border_pos, [self.world_size[0], 1024], self.data.colors.victory
@@ -126,15 +131,18 @@ class LavaGame:
         self.world_group.add(right_border)
 
     def update_display(self):
+        """update health display"""
         self.health_display = self.data.font.render(
             str(self.player.health), 1, (0, 0, 0)
         )
         self.data.screen.blit(self.health_display, (50, 50))
 
     def generate_world(self, path_limit):
+        """randomly generate a world"""
         self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
 
         def generate_path():
+            """randomly creates one, two, or three paths"""
             self.create_path(path.destination, 250)
             self.create_island(path.destination, 250)
             if not random.randrange(0, 2):
@@ -147,13 +155,13 @@ class LavaGame:
         # starting area
         self.create_island(self.data.middle, 400)
         self.create_path(self.data.middle, 200)
-        
-        # add paths until one of the conditions are met 
+
+        # add paths until one of the conditions are met
         victory_island_count = 0
         for path in self.paths:
             generate_path()
 
-            # count how many paths lead to victory zone
+            # count how many paths are outside the map
             if (
                 path.destination[0] > self.world_size[0]
                 or path.destination[1] > self.world_size[1]

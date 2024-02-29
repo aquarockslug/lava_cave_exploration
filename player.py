@@ -1,5 +1,6 @@
 import pygame
 
+
 class Sprite(pygame.sprite.Sprite):
     rect = pygame.Rect
     image = pygame.Surface
@@ -44,7 +45,6 @@ class Player(Sprite):
 
     def left_lava(self):
         """handler for when the lava is exited"""
-        pass
 
     def key_count(self, keys):
         """count how many movement keys are being pressed"""

@@ -2,6 +2,7 @@ import sys
 from dataclasses import dataclass
 import pygame
 
+
 @dataclass
 class ColorsData:
     menu = (154, 166, 177)
@@ -13,7 +14,7 @@ class ColorsData:
 
 @dataclass
 class GameData:
-    fps: int = 30 
+    fps: int = 30
     clock: pygame.time.Clock = pygame.time.Clock()
     colors = ColorsData()
     size: tuple = (1079, 1080)
@@ -21,9 +22,11 @@ class GameData:
     screen: pygame.Surface = pygame.display.set_mode([size[-1], size[1]])
     font = "monospace"
 
+
 if __name__ == "__main__":
     pygame.init()
     from lavagame import LavaGame
+
     LavaGame(GameData()).play()
     pygame.quit()
     sys.exit()
