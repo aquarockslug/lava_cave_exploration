@@ -44,7 +44,7 @@ class LavaGame:
         self.world_group.add(self.world)
         self.generate_world(100)
 
-        self.player: Player = Player(self.data, self.data.middle, [50, 50])
+        self.player: Player = Player(self.data.middle, [50, 50])
         self.player_group.add(self.player)
         
 
@@ -82,6 +82,8 @@ class LavaGame:
                 self.player.take_burn_damage()
                 self.burned_last_frame = True
             else:
+                if self.burned_last_frame:
+                    self.player.left_lava()
                 self.burned_last_frame = False
 
         # self.path_group.draw(self.data.screen)
@@ -127,7 +129,7 @@ class LavaGame:
         self.health_display = self.data.font.render(
             str(self.player.health), 1, (0, 0, 0)
         )
-        self.data.screen.blit(self.healtkkkjjkkkh_display, (50, 50))
+        self.data.screen.blit(self.health_display, (50, 50))
 
     def generate_world(self, path_limit):
         self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
@@ -174,7 +176,7 @@ class LavaGame:
         new_thickness = (
             int(thickness * sqrt(2)) if new_path_angle == [1, 1] else thickness
         )
-        new_length = random.choice([30, 60])
+        new_length = random.choice([40, 80])
         if 0 in new_path_angle:
             new_length *= 2
 
