@@ -20,17 +20,22 @@ class Player(Sprite):
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
     tank_image = pygame.image.load("assets/tank.png")
+    lava_enter_sound = pygame.mixer.Sound("assets/LavaSplash.wav")
+    engine_sound = pygame.mixer.Sound("assets/engine.wav")
+    burning_sound = pygame.mixer.Sound("assets/hiss.wav")
 
     def __init__(self, game, pos, size):
         super().__init__(pos, size, (255, 255, 0))
         self.tank_image = pygame.transform.scale(self.tank_image, self.size)
         self.image = pygame.transform.rotate(self.tank_image, 180)
+        self.burning_sound.set_volume(0.3)
+        self.engine_sound.play(-1)
 
     def fall_in_lava(self):
-        """play sound and animation"""
-        print("fell in lava")
+        self.lava_enter_sound.play()
 
     def take_burn_damage(self):
+        self.burning_sound.play()
         self.health -= 1
 
     def key_count(self, keys):
@@ -47,11 +52,17 @@ class Player(Sprite):
 
     def movement_handler(self, keys, path_group, world_group):
         """moves all sprites in the groups"""
-        if self.key_count(keys) >= 3:
+        key_count = self.key_count(keys)
+        if key_count >= 3:
             return
         speed = self.speed if not self.burning else self.speed / 2
-        if self.key_count(keys) >= 2:
+        if key_count >= 2:
             speed = speed - int(speed / 4) 
+
+        if key_count in (1, 2):
+            self.engine_sound.set_volume(0.7)
+        else:
+            self.engine_sound.set_volume(0.35)
 
         def move_group(group, i, is_x_axis):
             for element in group:

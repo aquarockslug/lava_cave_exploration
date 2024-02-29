@@ -3,7 +3,7 @@ import sys
 from math import sqrt
 import pygame
 
-from paths import Path, Island
+from path import Path, Island
 from player import Player
 
 
@@ -31,20 +31,22 @@ class LavaGame:
     paths = []
     world = pygame.sprite.Sprite
     burned_last_frame = False
+    ambient_sound = pygame.mixer.Sound("assets/LavaLoop.wav")
 
     def __init__(self, gamedata):
         self.data = gamedata
         self.data.font = pygame.font.SysFont("monospace", 42)
         self.health_display = self.data.font.render("200", 1, (255, 255, 255))
 
-        self.player: Player = Player(self.data, self.data.middle, [50, 50])
-        self.player_group.add(self.player)
-
-        self.world_size = [7500, 7500]
+        self.world_size = [7000, 7000]
         self.world_pos = [self.world_size[0] / 2, self.world_size[1] / 2]
         self.world = Sprite(self.world_pos, self.world_size, self.data.colors.victory)
         self.world_group.add(self.world)
         self.generate_world(100)
+
+        self.player: Player = Player(self.data, self.data.middle, [50, 50])
+        self.player_group.add(self.player)
+        
 
     def tile_surface(self, surface, image, tile_size):
         tile = pygame.transform.scale(image, [tile_size, tile_size])
@@ -53,6 +55,7 @@ class LavaGame:
                 surface.blit(tile, [col * tile_size, row * tile_size])
 
     def play(self):
+        self.ambient_sound.play(-1)
         playing = True
         while playing:
             self.render()
@@ -124,7 +127,7 @@ class LavaGame:
         self.health_display = self.data.font.render(
             str(self.player.health), 1, (0, 0, 0)
         )
-        self.data.screen.blit(self.health_display, (50, 50))
+        self.data.screen.blit(self.healtkkkjjkkkh_display, (50, 50))
 
     def generate_world(self, path_limit):
         self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
@@ -139,18 +142,23 @@ class LavaGame:
                 self.create_path(path.destination, 100)
                 self.create_island(path.destination, 400)
 
-        # add paths until size limit is reached
+        # starting area
         self.create_island(self.data.middle, 400)
         self.create_path(self.data.middle, 200)
+        
+        # add paths until one of the conditions are met 
         victory_island_count = 0
         for path in self.paths:
             generate_path()
+
+            # count how many paths lead to victory zone
             if (
                 path.destination[0] > self.world_size[0]
                 or path.destination[1] > self.world_size[1]
             ):
                 victory_island_count += 1
-            print(victory_island_count)
+
+            # stop generating conditions
             if victory_island_count > 0 and len(self.paths) >= path_limit:
                 break
             if victory_island_count >= 5:
@@ -179,8 +187,3 @@ class LavaGame:
         new_island = Island(self.data, pos, size)
         self.path_group.add(new_island)
         self.world.image.blit(new_island.image, [pos[0] - size / 2, pos[1] - size / 2])
-
-
-if __name__ == "__main__":
-    pygame.init()
-    LavaGame().play()

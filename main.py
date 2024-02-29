@@ -1,7 +1,6 @@
 import sys
 from dataclasses import dataclass
 import pygame
-from lavagame import LavaGame
 
 @dataclass
 class ColorsData:
@@ -24,6 +23,7 @@ class GameData:
 
 if __name__ == "__main__":
     pygame.init()
+    from lavagame import LavaGame
     LavaGame(GameData()).play()
     pygame.quit()
     sys.exit()
