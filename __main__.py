@@ -25,6 +25,8 @@ class GameData:
 
 if __name__ == "__main__":
     pygame.init()
+    from path import Path, Island
+    from player import Player 
     from lavagame import LavaGame
 
     LavaGame(GameData()).play()

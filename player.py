@@ -1,4 +1,5 @@
 import pygame
+import os
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -22,10 +23,11 @@ class Player(Sprite):
     health = 200
     burning = False
     move = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
-    tank_image = pygame.image.load("assets/tank.png")
-    lava_enter_sound = pygame.mixer.Sound("assets/LavaSplash.wav")
-    engine_sound = pygame.mixer.Sound("assets/engine.wav")
-    burning_sound = pygame.mixer.Sound("assets/hiss.wav")
+    asset_dir = os.path.join(os.path.dirname(__file__), 'assets')
+    tank_image = pygame.image.load(asset_dir + "/tank.png")
+    lava_enter_sound = pygame.mixer.Sound(asset_dir + "/LavaSplash.wav")
+    engine_sound = pygame.mixer.Sound(asset_dir + "/engine.wav")
+    burning_sound = pygame.mixer.Sound(asset_dir + "/hiss.wav")
 
     def __init__(self, pos, size):
         super().__init__(pos, size, (255, 255, 0))

@@ -1,5 +1,6 @@
 import random
 import sys
+import os
 from math import sqrt
 import pygame
 
@@ -31,7 +32,8 @@ class LavaGame:
     paths = []
     world = pygame.sprite.Sprite
     burned_last_frame = False
-    ambient_sound = pygame.mixer.Sound("assets/LavaLoop.wav")
+    asset_dir = os.path.join(os.path.dirname(__file__), 'assets')
+    ambient_sound = pygame.mixer.Sound(asset_dir + "/LavaLoop.wav")
 
     def __init__(self, gamedata):
         self.data = gamedata
@@ -117,7 +119,7 @@ class LavaGame:
             bottom_border_pos, [self.world_size[0], 1024], self.data.colors.victory
         )
         self.tile_surface(
-            bottom_border.image, pygame.image.load("assets/basalt.png"), 512
+            bottom_border.image, pygame.image.load(self.asset_dir + "/basalt.png"), 512
         )
         self.world_group.add(bottom_border)
 
@@ -126,7 +128,7 @@ class LavaGame:
             right_border_pos, [1024, self.world_size[0]], self.data.colors.victory
         )
         self.tile_surface(
-            right_border.image, pygame.image.load("assets/basalt.png"), 512
+            right_border.image, pygame.image.load(self.asset_dir + "/basalt.png"), 512
         )
         self.world_group.add(right_border)
 
@@ -139,7 +141,7 @@ class LavaGame:
 
     def generate_world(self, path_limit):
         """randomly generate a world"""
-        self.tile_surface(self.world.image, pygame.image.load("assets/fire.png"), 64)
+        self.tile_surface(self.world.image, pygame.image.load(self.asset_dir + "/fire.png"), 64)
 
         def generate_path():
             """randomly creates one, two, or three paths"""
